@@ -163,9 +163,12 @@ input,select{font:inherit;color:inherit}
      #viewport{transform:scale(.94)}   sai — bị inline của #stage đè
    So với padding cố định: lề bằng scale co theo cửa sổ nên không bao giờ âm. */
 #viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-          background:var(--page);overflow:hidden;scale:.94}
+          background:var(--page);overflow:hidden;overflow:clip;scale:.94}
+/* overflow:clip (không phải hidden) ở #viewport và #stage: với hidden, trình duyệt vẫn cuộn ngầm khung khi focus
+   phần tử nằm ngoài mép (ngăn Bộ lọc chờ bên phải, #stage 1600px rộng hơn màn) → cả shell trượt lệch.
+   clip cắt phần tràn mà không tạo vùng cuộn. Giữ dòng hidden phía trước cho trình duyệt cũ không hiểu clip. */
 #stage,#login{width:1600px;height:900px;flex:0 0 auto;transform-origin:center center;
-       position:relative;display:flex;overflow:hidden;
+       position:relative;display:flex;overflow:hidden;overflow:clip; /* clip: ngăn Bộ lọc nằm chờ ngoài mép phải làm shell cuộn lệch */
        background:var(--shell);border-radius:var(--r-shell);box-shadow:var(--sh-shell)}
 #stage[hidden],#login[hidden]{display:none}
 
