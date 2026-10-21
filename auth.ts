@@ -19,6 +19,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google({ authorization: { params: { prompt: 'select_account' } } })],
   // Trang đăng nhập và trang lỗi của Auth.js đều trỏ về /login (lỗi đi kèm ?error=...).
   pages: { signIn: '/login', error: '/login' },
+  // Tin header Host do nền tảng chuyển tới (Vercel, máy chủ sau reverse proxy). Không có dòng này, bản production
+  // chỉ chạy khi có AUTH_URL/AUTH_TRUST_HOST hoặc biến hệ thống VERCEL — thiếu là lỗi "Configuration" (UntrustedHost).
+  trustHost: true,
   session: { strategy: 'jwt' },
   callbacks: {
     // Chặn ngay lúc đăng nhập: email ngoài danh sách → /login?error=AccessDenied, không tạo phiên.
