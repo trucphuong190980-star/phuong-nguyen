@@ -3,9 +3,10 @@
 import type { Alert } from '@/lib/aggregate';
 import { alertTotal } from '@/lib/aggregate';
 import type { IconName } from '@/lib/icons';
+import { Avatar, useAccount } from './Account';
 import { Icon } from './Icon';
 
-export function TopBar({ icon, label, synced, syncing, onRefresh, alerts, notifOpen, onNotif, onAlert, onExport, onDrawer, filterCount }: {
+export function TopBar({ icon, label, synced, syncing, onRefresh, alerts, notifOpen, onNotif, onAlert, onExport, onDrawer, filterCount, userOpen, onUser }: {
   icon: IconName;
   label: string;
   synced: string;
@@ -18,8 +19,11 @@ export function TopBar({ icon, label, synced, syncing, onRefresh, alerts, notifO
   onExport: () => void;
   onDrawer: () => void;
   filterCount: number;
+  userOpen: boolean;
+  onUser: () => void;
 }) {
   const n = alertTotal(alerts);
+  const { name, email, image, leaving, logout } = useAccount();
   return (
     <header id="top">
       <div className="htitle"><Icon name={icon} className="lu-sm" /><b>{label}</b></div>
@@ -45,6 +49,24 @@ export function TopBar({ icon, label, synced, syncing, onRefresh, alerts, notifO
         <button className="ibtn pri" onClick={onDrawer}>
           <Icon name="sliders-horizontal" className="lu-sm" />Bộ lọc{filterCount ? <b>{' ' + filterCount}</b> : null}
         </button>
+        {/* Tài khoản đang đăng nhập: ảnh + tên, bấm mở menu có email và Đăng xuất */}
+        <div className="wrap">
+          <button className="ibtn ubadge" onClick={onUser} title={email ? `${name} · ${email}` : name} aria-label="Tài khoản">
+            <Avatar name={name} image={image} size={21} />
+            <span className="un">{name}</span>
+            <Icon name="chevron-down" className="lu-xs" />
+          </button>
+          <div className="pop" hidden={!userOpen}>
+            <div className="uhead">
+              <Avatar name={name} image={image} size={34} />
+              <span><b>{name}</b><small>{email}</small></span>
+            </div>
+            <div className="sep" />
+            <button className="r" onClick={logout} disabled={leaving}>
+              {leaving ? <span className="spin" /> : <Icon name="log-out" className="lu-sm" />}Đăng xuất
+            </button>
+          </div>
+        </div>
       </div>
     </header>
   );

@@ -1,3 +1,4 @@
+'use client';
 /* Sidebar 206px (thu gọn 58px), ngăn với nội dung bằng 1px hairline.
    Mục đang chọn tô nền --sub2 + chữ --ink, KHÔNG tô brand: brand để dành cho nút hành động chính. */
 import type { ReactNode } from 'react';
@@ -5,6 +6,7 @@ import { CFG, labelOf, lower } from '@/lib/config';
 import { vi } from '@/lib/format';
 import type { PageId } from '@/lib/types';
 import type { IconName } from '@/lib/icons';
+import { Avatar, useAccount } from './Account';
 import { Icon } from './Icon';
 
 export type NavItem = { id: PageId; label: string; icon: IconName; group: string; badge?: number; alert?: boolean };
@@ -32,7 +34,7 @@ export function Sidebar({ items, page, onPage, onRail, shown, total, note, theme
   acctOpen: boolean;
   onAcct: () => void;
 }) {
-  const user = CFG.app.user ?? { name: 'Bạn', first: 'bạn' };
+  const { name, email, image, leaving, logout } = useAccount();
   const nav: ReactNode[] = [];
   let group = '';
   for (const p of items) {
@@ -68,11 +70,14 @@ export function Sidebar({ items, page, onPage, onRail, shown, total, note, theme
           <div className="unote">{note}</div>
           <button className="ubtn" onClick={() => onPage('source')}>Xem nguồn dữ liệu</button>
         </div>
-        <div className="wrap">
-          <button className="acct" onClick={onAcct} title={user.email ?? user.name}>
-            <span className="av">{user.name.charAt(0).toUpperCase()}</span>
-            <span className="at"><span className="an">{user.name}</span><span className="ae">{user.email ?? user.role ?? ''}</span></span>
+        <div className="wrap acctrow">
+          <button className="acct" onClick={onAcct} title={email ? `${name} · ${email}` : name}>
+            <Avatar name={name} image={image} />
+            <span className="at"><span className="an">{name}</span><span className="ae">{email}</span></span>
             <Icon name="chevron-down" className="lu-xs" />
+          </button>
+          <button id="logout" title="Đăng xuất" aria-label="Đăng xuất" onClick={logout} disabled={leaving}>
+            {leaving ? <span className="spin" /> : <Icon name="log-out" className="lu-sm" />}
           </button>
           <div className="pop up" hidden={!acctOpen}>
             <button className="r" onClick={onTheme}>
@@ -81,6 +86,8 @@ export function Sidebar({ items, page, onPage, onRail, shown, total, note, theme
             </button>
             <button className="r" onClick={() => onPage('source')}><Icon name="database" className="lu-sm" />Nguồn dữ liệu</button>
             <button className="r" onClick={onReset}><Icon name="rotate-ccw" className="lu-sm" />Đặt lại bộ lọc</button>
+            <div className="sep" />
+            <button className="r" onClick={logout} disabled={leaving}><Icon name="log-out" className="lu-sm" />Đăng xuất</button>
           </div>
         </div>
       </div>

@@ -2,12 +2,18 @@
    GET /api/data?summary=1 → { meta, summary } (script check.mjs dùng để đối chiếu số tham chiếu)
    Không bao giờ trả về khoá: meta.env chỉ cho biết biến nào CÓ, không cho biết giá trị. */
 import { NextResponse } from 'next/server';
+import { auth, isAllowed } from '@/auth';
 import { summary } from '@/lib/aggregate';
 import { SourceError, loadData } from '@/lib/data-source';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
+  // Lớp chặn thứ hai (lớp đầu là proxy.ts): không đăng nhập hoặc email ngoài danh sách thì không trả dữ liệu.
+  const session = await auth();
+  if (!session?.user || !isAllowed(session.user.email)) {
+    return NextResponse.json({ error: 'Chưa đăng nhập hoặc không có quyền truy cập.' }, { status: 401 });
+  }
   try {
     const data = await loadData();
     if (new URL(req.url).searchParams.has('summary')) {

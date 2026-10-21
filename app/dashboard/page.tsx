@@ -35,7 +35,7 @@ export default function DashboardPage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [drawer, setDrawer] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [pop, setPop] = useState<'notif' | 'acct' | null>(null);
+  const [pop, setPop] = useState<'notif' | 'acct' | 'user' | null>(null);
 
   const fetchData = useCallback(async (first: boolean) => {
     if (first) setLoad('loading');
@@ -191,7 +191,8 @@ export default function DashboardPage() {
                   alerts={al} notifOpen={pop === 'notif'} onNotif={() => setPop((p) => (p === 'notif' ? null : 'notif'))} onAlert={onAlert}
                   onExport={() => { setDrawer(false); setPop(null); setExporting(true); }}
                   onDrawer={() => { setExporting(false); setPop(null); setDrawer(true); }}
-                  filterCount={filterCount(filters)} />
+                  filterCount={filterCount(filters)}
+                  userOpen={pop === 'user'} onUser={() => setPop((p) => (p === 'user' ? null : 'user'))} />
           <div id="body" className={isSource ? 'nokpi' : undefined}>
             <GreetBar context={context} chips={chips} onClear={reset} />
             {body}
