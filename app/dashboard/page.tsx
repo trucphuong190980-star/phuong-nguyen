@@ -6,7 +6,7 @@ import { FilterDrawer } from '@/components/FilterDrawer';
 import { ExportModal } from '@/components/ExportModal';
 import { GreetBar, type Chip } from '@/components/GreetBar';
 import { KpiBand } from '@/components/KpiBand';
-import { Shell } from '@/components/Shell';
+import { Shell, useCanvas } from '@/components/Shell';
 import { Sidebar, navItems } from '@/components/Sidebar';
 import { Tip } from '@/components/Tip';
 import { TopBar } from '@/components/TopBar';
@@ -98,7 +98,8 @@ export default function DashboardPage() {
   const filtered = useMemo(() => applyFilters(rows, filters), [rows, filters]);
   const prev = useMemo(() => prevRows(rows, filters), [rows, filters]);
   const al = useMemo(() => alertsOf(filtered, rows), [filtered, rows]);
-  const L = useMemo(() => layout(rail ? SIDE_RAIL : SIDE_WIDE), [rail]);
+  const cv = useCanvas();
+  const L = useMemo(() => layout(rail ? SIDE_RAIL : SIDE_WIDE, cv ?? undefined), [rail, cv]);
   const days = meta?.days ?? 0;
   const from = meta?.from ?? '2000-01-01';
 
@@ -179,7 +180,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Shell className={stageClass}>
+      <Shell className={stageClass} canvas={cv}>
         <Sidebar items={items} page={page} onPage={go} onRail={() => setRail((v) => !v)}
                  shown={filtered.length} total={rows.length}
                  note={meta ? `${vi(items[1].badge ?? 0)} ${lower(labelOf(PRIMARY))} · ${vi(days)} ngày dữ liệu` : '—'}
@@ -192,7 +193,16 @@ export default function DashboardPage() {
                   onExport={() => { setDrawer(false); setPop(null); setExporting(true); }}
                   onDrawer={() => { setExporting(false); setPop(null); setDrawer(true); }}
                   filterCount={filterCount(filters)}
-                  userOpen={pop === 'user'} onUser={() => setPop((p) => (p === 'user' ? null : 'user'))} />
+                  userOpen={pop === 'user'} onUser={() => setPop((p) => (p === 'user' ? null : 'user'))}
+                  theme={theme} onTheme={toggleTheme} access={meta?.access} />
+          {/* Điện thoại: sidebar ẩn, điều hướng thành dải tab (CSS #mnav chỉ hiện trong #viewport.mobile) */}
+          <nav id="mnav">
+            {items.map((p) => (
+              <button key={p.id} className={page === p.id ? 'on' : undefined} onClick={() => go(p.id)}>
+                {p.label}{p.badge ? <span className="bdg">{p.badge}</span> : null}
+              </button>
+            ))}
+          </nav>
           <div id="body" className={isSource ? 'nokpi' : undefined}>
             <GreetBar context={context} chips={chips} onClear={reset} />
             {body}

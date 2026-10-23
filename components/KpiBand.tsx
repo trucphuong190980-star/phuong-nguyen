@@ -2,7 +2,7 @@
    Chỉ KPI có ngưỡng mới được tô xanh/đỏ. Chỉ số nghịch (better: lower) tăng là xấu ⇒ mũi tên đảo màu. */
 import type { ReactNode } from 'react';
 import { agg, byGrain } from '@/lib/aggregate';
-import { CFG, meets, metric, thresholdsOf } from '@/lib/config';
+import { CFG, CURRENCY, isMoney, meets, metric, thresholdsOf } from '@/lib/config';
 import { fmt, pct } from '@/lib/format';
 import type { IconName } from '@/lib/icons';
 import type { Agg, Period, Row } from '@/lib/types';
@@ -52,7 +52,7 @@ function KpiCard({ k, i, a, p, days, w }: { k: string; i: number; a: Agg; p: Agg
   return (
     <div className="card kpi">
       <div className="kl"><Icon name={m.icon ?? DEFAULT_ICONS[i % 5]} className="lu-sm" />{m.label}</div>
-      <div className="kv">{f(v)}<span className={`del ${cls}`}>{delta}</span></div>
+      <div className="kv">{f(v)}{isMoney(k) && <small className="unit">{CURRENCY}</small>}<span className={`del ${cls}`}>{delta}</span></div>
       <div className="kspark"><SparkLine w={w} h={34} values={values} color={color} base={base} /></div>
       <div className={hit === null ? 'ks' : hit ? 'ks ok' : 'ks bad'}>
         <Icon name={hit === null ? 'clock' : hit ? 'circle-check' : 'triangle-alert'} className="lu-xs" />{note}

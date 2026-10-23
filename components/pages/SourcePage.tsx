@@ -13,7 +13,7 @@ const kv: CSSProperties = { flex: '0 0 auto', minHeight: 0, padding: '9px 0', bo
 
 function KV({ items }: { items: [string, ReactNode][] }) {
   return (
-    <div className="rank" style={{ overflow: 'visible' }}>
+    <div className="rank" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>{/* màn thấp: danh sách cuộn trong card */}
       {items.map(([k, v]) => (
         <div className="rk" style={kv} key={k}><div className="rkh" style={{ margin: 0 }}><b>{k}</b><span>{v}</span></div></div>
       ))}

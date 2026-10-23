@@ -6,6 +6,25 @@ import { LOSS, meets } from './config';
 import type { Agg } from './types';
 
 export const CV = { w: 1600, h: 900 } as const;
+/* Khung co giãn: laptop vẽ ở đúng cỡ màn (scale 1) thay vì thu nhỏ cả tấm 1600×900.
+   Nhỏ hơn MIN thì mới thu nhỏ; lớn hơn CV thì giữ 1600×900 và phóng như cũ. Hẹp hơn MOBILE_MAX = bố cục điện thoại. */
+export const CV_MIN = { w: 1280, h: 720 } as const;
+export const MOBILE_MAX = 900;
+
+export type Canvas = { w: number; h: number; scale: number; mobile: boolean };
+
+export function canvasFor(vw: number, vh: number): Canvas {
+  if (vw < MOBILE_MAX) return { w: vw, h: 0, scale: 1, mobile: true }; // h=0: cao theo nội dung, trang tự cuộn dọc
+  const big = Math.min(vw / CV.w, vh / CV.h);
+  if (big >= 1) return { w: CV.w, h: CV.h, scale: big, mobile: false };
+  const s = Math.min(1, vw / CV_MIN.w, vh / CV_MIN.h);
+  return { w: Math.min(CV.w, Math.floor(vw / s)), h: Math.min(CV.h, Math.floor(vh / s)), scale: s, mobile: false };
+}
+
+/** Chiều cao mỗi hàng chart: phần còn lại của canvas sau thanh trên, lời chào, KPI và các khoảng cách. */
+export const rowH = (h: number): number => Math.max(200, Math.floor((h - (CV.h - BAND.row2 - BAND.row3)) / 2));
+export const MOBILE_ROW = 300; // điện thoại: mỗi chart một hàng, cao cố định
+export const MOBILE_PAD_X = 12;
 
 export const SIDE_BORDER = 1;
 export const BODY_PAD_X = 24;
@@ -31,16 +50,27 @@ export type Layout = {
 /* Mọi kích thước suy ra từ MỘT biến: bề rộng sidebar.
    206 → Row 2: 399 / 932 · Row 3: 532 / 799 · KPI 259 · chiều cao vẽ 230
     58 → Row 2: 443 / 1036 · Row 3: 591 / 888 · KPI 289 · chiều cao vẽ 230 */
-export function layout(side: number = SIDE_WIDE): Layout {
-  const innerW = CV.w - side - SIDE_BORDER - BODY_PAD_X * 2;
+export function layout(side: number = SIDE_WIDE, cv: Canvas = { ...CV, scale: 1, mobile: false }): Layout {
+  const plot = (w: number, bandH: number): Plot => ({ w: w - CARD_PAD * 2, h: bandH - CARD_PAD * 2 - CHEAD });
+  if (cv.mobile) {
+    // Điện thoại: không sidebar, mỗi card rộng hết màn, KPI 2 cột.
+    const innerW = cv.w - MOBILE_PAD_X * 2;
+    return {
+      innerW, a: innerW, b: innerW, c: innerW, d: innerW,
+      kpiW: Math.floor((innerW - KPI_GAP) / 2),
+      p2a: plot(innerW, MOBILE_ROW), p2b: plot(innerW, MOBILE_ROW),
+      p3c: plot(innerW, MOBILE_ROW), p3d: plot(innerW, MOBILE_ROW),
+    };
+  }
+  const innerW = cv.w - side - SIDE_BORDER - BODY_PAD_X * 2;
+  const row = rowH(cv.h);
   const a = Math.floor((innerW - GAP) * 0.3), b = innerW - GAP - a;
   const c = Math.floor((innerW - GAP) * 0.4), d = innerW - GAP - c;
-  const plot = (w: number, bandH: number): Plot => ({ w: w - CARD_PAD * 2, h: bandH - CARD_PAD * 2 - CHEAD });
   return {
     innerW, a, b, c, d,
     kpiW: Math.floor((innerW - KPI_GAP * 4) / 5),
-    p2a: plot(a, BAND.row2), p2b: plot(b, BAND.row2),
-    p3c: plot(c, BAND.row3), p3d: plot(d, BAND.row3),
+    p2a: plot(a, row), p2b: plot(b, row),
+    p3c: plot(c, row), p3d: plot(d, row),
   };
 }
 

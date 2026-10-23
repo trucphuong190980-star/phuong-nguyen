@@ -1,6 +1,6 @@
 /* Hai bảng viết tay bằng <table>: bảng theo kỳ tô nhiệt (trang Tổng quan) và bảng chỉ số đầy đủ theo nhóm.
    Bảng cuộn TRONG khối .tscroll, không làm cuộn cả trang. */
-import { iconOf, meets, metric, thresholdsOf } from '@/lib/config';
+import { iconOf, labelU, meets, metric, thresholdsOf } from '@/lib/config';
 import { fmt } from '@/lib/format';
 import type { Agg, Group, Period } from '@/lib/types';
 import { Icon } from '../Icon';
@@ -23,7 +23,7 @@ export function PeriodTable({ periods, total, keys }: { periods: Period[]; total
   return (
     <div className="tscroll">
       <table>
-        <thead><tr><th>Kỳ</th>{keys.map((k) => <th key={k}>{metric(k).label}</th>)}</tr></thead>
+        <thead><tr><th>Kỳ</th>{keys.map((k) => <th key={k}>{labelU(k)}</th>)}</tr></thead>
         <tbody>
           {periods.map((p) => (
             <tr key={String(p.k)}>
@@ -63,7 +63,7 @@ export function DimTable({ dim, dimLabel, groups, total, keys }: {
   return (
     <div className="tscroll">
       <table>
-        <thead><tr><th>{dimLabel}</th>{keys.map((k) => <th key={k}>{metric(k).label}</th>)}</tr></thead>
+        <thead><tr><th>{dimLabel}</th>{keys.map((k) => <th key={k}>{labelU(k)}</th>)}</tr></thead>
         <tbody>
           {groups.map((g) => (
             <tr key={g.k}>

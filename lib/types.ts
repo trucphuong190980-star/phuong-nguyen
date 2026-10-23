@@ -22,7 +22,11 @@ export type Meta = {
   fetchedAt: string;
   header: string[];
   env: Record<string, boolean>;
+  access?: Access; // quyền xem của người đang đăng nhập (route /api/data gắn vào)
 };
+
+/** admin: là Admin theo ADMIN_EMAILS · all: xem toàn bộ · values: các giá trị của cột `dim` được xem khi !all */
+export type Access = { admin: boolean; all: boolean; dim: string; values: string[] };
 
 export type DataOk = { rows: Row[]; meta: Meta };
 export type DataErr = { error: string; hint?: string };

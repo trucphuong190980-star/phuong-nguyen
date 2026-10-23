@@ -1,6 +1,6 @@
 /* Trang 1 · Tổng quan — đúng 4 chart, chia 30/70 (Row 2) và 40/60 (Row 3). */
 import { GRAIN_VI, agg, byGrain, group, sortBy } from '@/lib/aggregate';
-import { CFG, PRIMARY, SECONDARY, isAdditive, labelOf, lower, metric, thresholdsOf } from '@/lib/config';
+import { CFG, PRIMARY, SECONDARY, isAdditive, labelOf, labelU, lower, metric, thresholdsOf } from '@/lib/config';
 import { fmt, pct } from '@/lib/format';
 import { LGD2, seriesColor, type Layout } from '@/lib/tokens';
 import type { Grain, Row } from '@/lib/types';
@@ -38,14 +38,14 @@ export function OverviewPage({ rows, L, param, grain, onGrain, from, onToggle }:
   return (
     <>
       <div id="row2">
-        <ChartCard width={L.a} title={`Tỷ trọng theo ${lower(labelOf(PRIMARY))}`} sub={`${dm.label} · bấm để lọc`}
+        <ChartCard width={L.a} title={`Tỷ trọng theo ${lower(labelOf(PRIMARY))}`} sub={`${labelU(dk)} · bấm để lọc`}
                    legend={<Legend two items={slices.map((s) => ({ name: s.k, color: s.color }))} />}>
           <div className="plot">
             <DonutChart w={L.p2a.w} h={L.p2a.h - LGD2} items={slices}
                         center={[byPrim.length ? pct((byPrim[0].v[dk] ?? 0) / (total[dk] || 1), 0) : '—', byPrim[0]?.k ?? '']} />
           </div>
         </ChartCard>
-        <ChartCard width={L.b} title={`Xu hướng ${p.label}`} sub={`Theo ${lower(GRAIN_VI[grain])} · đưa chuột lên chart để xem chi tiết`}
+        <ChartCard width={L.b} title={`Xu hướng ${labelU(param)}`} sub={`Theo ${lower(GRAIN_VI[grain])} · đưa chuột lên chart để xem chi tiết`}
                    right={<GrainSeg grain={grain} onGrain={onGrain} />}>
           <div className="plot">
             <TrendChart w={L.p2b.w} h={L.p2b.h} labels={periods.map((x) => x.label)} fmt={f}
@@ -54,7 +54,7 @@ export function OverviewPage({ rows, L, param, grain, onGrain, from, onToggle }:
         </ChartCard>
       </div>
       <div id="row3">
-        <ChartCard width={L.c} title={`Top ${lower(labelOf(SECONDARY))}`} sub={`${p.label} · bấm để lọc chéo`}>
+        <ChartCard width={L.c} title={`Top ${lower(labelOf(SECONDARY))}`} sub={`${labelU(param)} · bấm để lọc chéo`}>
           <div className="plot">
             <RankBars w={L.p3c.w} h={L.p3c.h} pl={132} pr={76}
                       items={bySec.map((g, i) => ({

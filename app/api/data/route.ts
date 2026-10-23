@@ -3,7 +3,9 @@
    Không bao giờ trả về khoá: meta.env chỉ cho biết biến nào CÓ, không cho biết giá trị. */
 import { NextResponse } from 'next/server';
 import { auth, isAllowed } from '@/auth';
+import { accessFor, scopeRows } from '@/lib/access';
 import { summary } from '@/lib/aggregate';
+import { labelOf, lower } from '@/lib/config';
 import { SourceError, loadData } from '@/lib/data-source';
 
 export const dynamic = 'force-dynamic';
@@ -16,10 +18,22 @@ export async function GET(req: Request) {
   }
   try {
     const data = await loadData();
-    if (new URL(req.url).searchParams.has('summary')) {
-      return NextResponse.json({ meta: data.meta, summary: summary(data.rows, data.meta) });
+    // Phân quyền theo email (lib/access.ts): lọc dòng ở server, trình duyệt không bao giờ nhận dòng ngoài quyền.
+    const access = accessFor(session.user.email);
+    const rows = scopeRows(data.rows, access);
+    if (!rows.length) {
+      return NextResponse.json({
+        error: `Tài khoản ${session.user.email} chưa được giao ${lower(labelOf(access.dim))} nào có dữ liệu.`,
+        hint: 'Bạn không có quyền truy cập vui lòng liên hệ Admin.',
+      }, { status: 403 });
     }
-    return NextResponse.json(data);
+    // Giữ from/days của toàn bộ dữ liệu: trục ngày (r.t) tính từ ngày đầu tiên của Sheet.
+    const meta = { ...data.meta, count: rows.length, access };
+    if (new URL(req.url).searchParams.has('summary')) {
+      if (!access.all) return NextResponse.json({ error: 'Chỉ Admin xem được tóm tắt toàn bộ.' }, { status: 403 });
+      return NextResponse.json({ meta, summary: summary(rows, meta) });
+    }
+    return NextResponse.json({ rows, meta });
   } catch (e) {
     const error = e instanceof Error ? e.message : 'Lỗi không xác định';
     const hint = e instanceof SourceError ? e.hint : undefined;

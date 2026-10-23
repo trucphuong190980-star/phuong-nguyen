@@ -1,7 +1,7 @@
 /* Trang 2 và 3 · Theo một dimension — cùng bố cục, đổi dimension.
    Màu của một nhóm = hạng của nó theo chỉ số đang chọn, giữ nguyên trên cả 4 chart của trang. */
 import { GRAIN_VI, agg, byGrain, group, sortBy } from '@/lib/aggregate';
-import { CFG, PRIMARY, isAdditive, labelOf, lower, metric } from '@/lib/config';
+import { CFG, CURRENCY, PRIMARY, isAdditive, isMoney, labelOf, labelU, lower, metric } from '@/lib/config';
 import { fmt, pct } from '@/lib/format';
 import { LGD1, LGD2, seriesColor, type Layout } from '@/lib/tokens';
 import type { Grain, Group, Row } from '@/lib/types';
@@ -42,7 +42,7 @@ export function DimPage({ rows, L, dim, param, grain, onGrain, from, onToggle }:
   return (
     <>
       <div id="row2">
-        <ChartCard width={L.a} title={`Xếp hạng ${dl}`} sub={`${p.label} · bấm để lọc`}>
+        <ChartCard width={L.a} title={`Xếp hạng ${dl}`} sub={`${labelU(param)} · bấm để lọc`}>
           <div className="plot">
             <RankBars w={L.p2a.w} h={L.p2a.h} pl={dim === PRIMARY ? 100 : 126} pr={76}
                       items={G.slice(0, 7).map((g) => ({
@@ -51,7 +51,7 @@ export function DimPage({ rows, L, dim, param, grain, onGrain, from, onToggle }:
                       }))} />
           </div>
         </ChartCard>
-        <ChartCard width={L.b} title={`${p.label} theo ${dl} qua thời gian`} sub={`Top ${top.length} · theo ${lower(GRAIN_VI[grain])}`}
+        <ChartCard width={L.b} title={`${labelU(param)} theo ${dl} qua thời gian`} sub={`Top ${top.length} · theo ${lower(GRAIN_VI[grain])}`}
                    right={<GrainSeg grain={grain} onGrain={onGrain} />}
                    legend={<Legend items={lines.map((l) => ({ name: l.name, color: l.color }))} />}>
           <div className="plot">
@@ -60,7 +60,7 @@ export function DimPage({ rows, L, dim, param, grain, onGrain, from, onToggle }:
         </ChartCard>
       </div>
       <div id="row3">
-        <ChartCard width={L.c} title={`Tỷ trọng ${dm.label}`} sub={`Trên tổng ${fmt(dm.format, total[dk] ?? 0)}`}
+        <ChartCard width={L.c} title={`Tỷ trọng ${dm.label}`} sub={`Trên tổng ${fmt(dm.format, total[dk] ?? 0)}${isMoney(dk) ? ' ' + CURRENCY : ''}`}
                    legend={<Legend two items={share.map((g) => ({ name: g.k, color: colorOf(g) }))} />}>
           <div className="plot">
             <DonutChart w={L.p3c.w} h={L.p3c.h - LGD2}
@@ -71,7 +71,7 @@ export function DimPage({ rows, L, dim, param, grain, onGrain, from, onToggle }:
                         center={[share.length ? pct((share[0].v[dk] ?? 0) / (total[dk] || 1), 0) : '—', share[0] ? short(share[0].k, 18) : '']} />
           </div>
         </ChartCard>
-        <ChartCard width={L.d} title="Bảng chỉ số đầy đủ" sub={`Sắp theo ${p.label}`}>
+        <ChartCard width={L.d} title="Bảng chỉ số đầy đủ" sub={`Sắp theo ${labelU(param)}`}>
           <DimTable dim={dim} dimLabel={labelOf(dim)} groups={G} total={total} keys={CFG.tableMetrics} />
         </ChartCard>
       </div>

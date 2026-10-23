@@ -89,6 +89,12 @@ export const METRICS: Record<string, Metric> = Object.fromEntries(CFG.metrics.ma
 export const metric = (key: string): Metric =>
   METRICS[key] ?? { key, label: key, format: 'dec', better: 'higher', col: key };
 
+/** Đơn vị tiền hiển thị. Số tiền rút gọn (tr, tỷ, k) nên đơn vị ghi ở nhãn/tiêu đề, không lặp trong từng số. */
+export const CURRENCY = 'VNĐ';
+export const isMoney = (key: string): boolean => metric(key).format === 'money';
+/** Nhãn kèm đơn vị: "Chi phí (VNĐ)". Dùng cho tiêu đề chart và đầu cột bảng. */
+export const labelU = (key: string): string => metric(key).label + (isMoney(key) ? ` (${CURRENCY})` : '');
+
 /* Chỉ số cộng được (tổng của một cột METRIC) mới được vẽ thành "tỷ trọng". Tỷ trọng ROAS là con số vô nghĩa. */
 export function isAdditive(key: string): boolean {
   const m = METRICS[key];

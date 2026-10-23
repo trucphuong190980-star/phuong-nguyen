@@ -4,10 +4,10 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 
-/** ALLOWED_EMAILS="a@x.com,b@y.com" → so khớp không phân biệt hoa thường, bỏ khoảng trắng thừa. */
+/** ALLOWED_EMAILS (và ADMIN_EMAILS — Admin luôn được vào) = "a@x.com,b@y.com" → so khớp không phân biệt hoa thường. */
 export function isAllowed(email: string | null | undefined): boolean {
   if (!email) return false;
-  const list = (process.env.ALLOWED_EMAILS ?? '')
+  const list = `${process.env.ALLOWED_EMAILS ?? ''},${process.env.ADMIN_EMAILS ?? ''}`
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);

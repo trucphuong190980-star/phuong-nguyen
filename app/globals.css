@@ -163,7 +163,9 @@ input,select{font:inherit;color:inherit}
      #viewport{transform:scale(.94)}   sai — bị inline của #stage đè
    So với padding cố định: lề bằng scale co theo cửa sổ nên không bao giờ âm. */
 #viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-          background:var(--page);overflow:hidden;overflow:clip;scale:.94}
+          background:var(--page);overflow:hidden;overflow:clip}
+/* Lề .94 chỉ cho màn lớn (tấm 1600×900 phóng to). Laptop: tấm bằng đúng cỡ màn, không lề, để chữ không bị thu nhỏ. */
+#viewport.big{scale:.94}
 /* overflow:clip (không phải hidden) ở #viewport và #stage: với hidden, trình duyệt vẫn cuộn ngầm khung khi focus
    phần tử nằm ngoài mép (ngăn Bộ lọc chờ bên phải, #stage 1600px rộng hơn màn) → cả shell trượt lệch.
    clip cắt phần tràn mà không tạo vùng cuộn. Giữ dòng hidden phía trước cho trình duyệt cũ không hiểu clip. */
@@ -383,13 +385,14 @@ img.av{object-fit:cover;background:var(--sub2)}
 #greet{height:52px;flex:0 0 52px;display:flex;align-items:center;justify-content:space-between;gap:14px}
 #kpis{height:118px;flex:0 0 118px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
 /* Row 2 và Row 3 CAO BẰNG NHAU ⇒ 4 card chart cùng một chiều cao vẽ */
-#row2{height:301px;flex:0 0 301px;display:flex;gap:14px}
-#row3{height:301px;flex:0 0 301px;display:flex;gap:14px}
+/* --row-h do Shell tính theo chiều cao màn (301px ở 900px cao, thấp hơn trên laptop) */
+#row2{height:var(--row-h,301px);flex:0 0 var(--row-h,301px);display:flex;gap:14px}
+#row3{height:var(--row-h,301px);flex:0 0 var(--row-h,301px);display:flex;gap:14px}
 /* Trang "Nguồn dữ liệu" ẩn băng KPI ⇒ dư đúng 132px ở đáy. Hai hàng còn lại
    giãn ra lấp chỗ đó, thay vì để một vệt trắng không ai giải thích được.
    Chỉ trang này mới bỏ px cứng — ba trang theo dõi vẫn phải khoá pixel để
    bốn chart cao bằng nhau. */
-#body.nokpi #row2,#body.nokpi #row3{flex:1 1 0;height:auto}
+#body.nokpi #row2,#body.nokpi #row3{flex:1 1 0;height:auto;min-height:0} /* min-height:0: bảng dài cuộn trong card, không đẩy hàng dưới ra khỏi màn laptop thấp */
 /* Lời chào TRƯỚC, dòng bối cảnh SAU — người đọc cần biết mình đang ở đâu
    trước khi cần biết kỳ nào. 24 + 4 + 15 ≈ 43, vừa băng 52px. */
 .ghi{font-size:20px;font-weight:600;letter-spacing:-.03em;line-height:1.2;
@@ -648,3 +651,58 @@ th.srt{cursor:pointer} th.srt:hover{color:var(--ink)}
 .uhead b{font-size:12.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .uhead small{font-size:11px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pop .r .spin{width:14px;height:14px;flex-basis:14px}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ĐIỆN THOẠI / MÁY TÍNH BẢNG DỌC (< 900px) — #viewport.mobile do Shell gắn
+   Không thu nhỏ cả tấm (chữ sẽ chỉ còn 2–3px): tấm rộng hết màn, card xếp dọc,
+   trang cuộn dọc. Sidebar ẩn, điều hướng chuyển thành dải tab #mnav dưới header.
+   Bề rộng chart vẫn là px từ layout() (lib/tokens.ts, nhánh mobile).
+   ═══════════════════════════════════════════════════════════════════════════ */
+#mnav{display:none}
+#viewport.mobile{display:block;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#viewport.mobile #stage,#viewport.mobile #login{width:100%;height:auto;min-height:100%;border-radius:0;
+       box-shadow:none;overflow:visible;overflow-x:clip}
+#viewport.mobile #login{padding:24px 0}
+#viewport.mobile .logincard{width:calc(100% - 32px);max-width:440px;padding:30px 22px 24px}
+#viewport.mobile .logincard h1{font-size:21px}
+#viewport.mobile #side{display:none}
+#viewport.mobile #top{position:sticky;top:0;z-index:30;background:var(--shell);padding:0 12px;gap:6px}
+#viewport.mobile .sync,#viewport.mobile .hide-m,#viewport.mobile .ubadge .un{display:none}
+#viewport.mobile .ibtn{padding:0 10px}
+#viewport.mobile .ibtn.ubadge{padding:0 6px 0 4px}
+#viewport.mobile #mnav{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;border-bottom:1px solid var(--line);
+       scrollbar-width:none}
+#mnav button{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:var(--r-pill);
+       font-size:12.5px;color:var(--ink2);border:1px solid var(--line);white-space:nowrap}
+#mnav button.on{background:var(--sub2);color:var(--ink);border-color:var(--sub2);font-weight:500}
+#mnav .bdg{font-size:10px;font-weight:600;color:var(--ink3)}
+#viewport.mobile #body{flex:none;overflow:visible;padding:14px 12px 24px}
+#viewport.mobile #greet{height:auto;flex:none;flex-wrap:wrap;align-items:flex-start}
+#viewport.mobile .ghi{font-size:18px}
+#viewport.mobile .gday{white-space:normal}
+#viewport.mobile .chips{flex-wrap:wrap}
+#viewport.mobile #kpis{height:auto;flex:none;grid-template-columns:repeat(2,minmax(0,1fr))}
+#viewport.mobile #kpis .kpi{height:118px}
+#viewport.mobile #row2,#viewport.mobile #row3,#viewport.mobile #body.nokpi #row2,#viewport.mobile #body.nokpi #row3{
+       height:auto;flex:none;flex-direction:column}
+#viewport.mobile #row2>.card,#viewport.mobile #row3>.card{height:auto;min-height:300px;flex:none!important}
+#viewport.mobile .card.empty{min-height:300px}
+/* Lớp phủ: tấm không còn transform ⇒ fixed bám theo màn hình, không theo trang dài */
+#viewport.mobile #scrim,#viewport.mobile #modal{position:fixed}
+#viewport.mobile #drawer{position:fixed;width:100%;max-width:380px}
+#viewport.mobile .sheet{width:calc(100% - 24px);max-height:calc(100% - 24px)}
+/* Đơn vị tiền cạnh số KPI: nhỏ, xám, để số vẫn là thứ đọc trước */
+.kv .unit{font-size:11px;font-weight:500;letter-spacing:0;color:var(--ink3);margin-left:-4px}
+#viewport.mobile #top .pop{position:fixed;top:52px;right:12px;left:auto;max-width:calc(100vw - 24px)}
+.uacc{font-size:11px;color:var(--ink2);padding:0 9px 6px;line-height:1.4}
+/* Bảng nhiều cột rộng hơn màn điện thoại: cuộn ngang trong card thay vì bị cắt mất cột */
+#viewport.mobile .tscroll{overflow-x:auto}
+/* KPI 2 cột (~166px): số tiền "396,1 tr VNĐ" + pill phải nằm một dòng, không rớt xuống đè sparkline */
+#viewport.mobile .kv{font-size:18px;gap:5px;white-space:nowrap;padding:0 11px}
+#viewport.mobile .kv .unit{font-size:10px;margin-left:-2px}
+#viewport.mobile .del{font-size:9.5px;padding:1px 4px}
+#viewport.mobile .kl,#viewport.mobile .kspark{padding:0 11px}
+#viewport.mobile .ks{padding:0 11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:26px}
+/* Đầu card cao cố định 43px (CHEAD) — dòng phụ dài xuống 2 dòng sẽ đè lên chart; trên điện thoại cắt còn 1 dòng */
+#viewport.mobile .chead>div:first-child{min-width:0}
+#viewport.mobile .chead .ct,#viewport.mobile .chead .cs{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
